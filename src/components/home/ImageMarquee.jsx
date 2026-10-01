@@ -16,7 +16,9 @@
 //   * Diagonal crossover light shimmer sweep
 // ---------------------------------------------------------
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Pause, Play } from 'lucide-react'
+import useReducedMotion from '../../hooks/useReducedMotion'
 import showcaseImages, {
   showcaseRowA,
   showcaseRowB,
@@ -95,6 +97,7 @@ function SingleMarqueeRow({
   images,
   direction = 'left',
   speed = 50,
+  paused = false,
 }) {
   // Triple the items for a silky, seamless infinite loop
   const content = [...images, ...images, ...images]
@@ -105,7 +108,10 @@ function SingleMarqueeRow({
     <div className="relative overflow-hidden py-4 sm:py-6">
       <div
         className={`${trackClass} gap-4 sm:gap-6 px-3`}
-        style={{ '--marquee-speed': `${speed}s` }}
+        style={{
+          '--marquee-speed': `${speed}s`,
+          animationPlayState: paused ? 'paused' : 'running',
+        }}
       >
         {content.map((img, index) => (
           <MarqueeTile
@@ -130,6 +136,26 @@ function ImageMarquee({
   className = '',
   ariaLabel = 'Cyber Link showcase gallery',
 }) {
+  const prefersReducedMotion = useReducedMotion()
+  const [isPaused, setIsPaused] = useState(prefersReducedMotion)
+
+  useEffect(() => {
+    setIsPaused(prefersReducedMotion)
+  }, [prefersReducedMotion])
+
+  const motionControl = (
+    <button
+      type="button"
+      onClick={() => setIsPaused((paused) => !paused)}
+      aria-label={isPaused ? 'Play image marquee' : 'Pause image marquee'}
+      aria-pressed={isPaused}
+      title={isPaused ? 'Play image marquee' : 'Pause image marquee'}
+      className="absolute right-3 top-1/2 z-30 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#007f83]/20 bg-white/95 text-[#006b70] shadow-md backdrop-blur-sm transition-colors hover:bg-[#e1f1ef] focus-visible:outline-offset-2"
+    >
+      {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
+    </button>
+  )
+
   // Determine which images to display
   let selectedImages = images
   let resolvedDirection = direction
@@ -172,13 +198,16 @@ function ImageMarquee({
             images={showcaseRowA}
             direction="left"
             speed={95}
+            paused={isPaused}
           />
           <SingleMarqueeRow
             images={showcaseRowB}
             direction="right"
             speed={105}
+            paused={isPaused}
           />
         </div>
+        {motionControl}
       </section>
     )
   }
@@ -203,7 +232,9 @@ function ImageMarquee({
         images={selectedImages}
         direction={resolvedDirection || 'left'}
         speed={resolvedSpeed || 50}
+        paused={isPaused}
       />
+      {motionControl}
     </section>
   )
 }

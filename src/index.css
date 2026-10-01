@@ -670,6 +670,12 @@ a {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .marquee-track-left,
+  .marquee-track-right {
+    animation-duration: var(--marquee-speed, 50s) !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 /* ---------------------------------------------------------
@@ -708,7 +714,16 @@ a {
   animation: marqueeScrollRight var(--marquee-speed, 50s) linear infinite;
 }
 
-.marquee-wrapper:hover .marquee-track-left,
-.marquee-wrapper:hover .marquee-track-right {
-  animation-play-state: paused;
-}
+@media (hover: hover) and (pointer: fine) {
+  .marquee-wrapper:hover .marquee-track-left,
+  .marquee-wrapper:hover .marquee-track-right {
+    animation-play-state: paused;
+  }
+}
+
+@media (max-width: 640px) {
+  .marquee-track-left,
+  .marquee-track-right {
+    animation-duration: min(var(--marquee-speed, 50s), 60s);
+  }
+}
